@@ -36,9 +36,9 @@ client.once(Events.ClientReady, readyClient => {
 client.on(Events.InteractionCreate, async interaction =>{
     if ( !interaction.isChatInputCommand()) return;
     const nickname = interaction.member.nickname ? `alias ${interaction.member.nickname} ` : "";
-    const username = interaction.member.username;
+    const username = interaction.member.user.username;
     const userID = interaction.member.id;
-    const guildname = interaction.guild.name;
+    const guildname = interaction.guild;
 
     logger.log(`User ${username} (ID = ${userID}) ${nickname}use ${interaction} in ${guildname}`)
 

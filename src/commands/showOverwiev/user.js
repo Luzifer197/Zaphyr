@@ -1,33 +1,32 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js')
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('user')
-		.setDescription('Provides information about the user.')
-        .addUserOption(option => option.setName('target').setDescription('markier ein User').setRequired(true)),
-	async execute(interaction) {
-        var target = interaction.options.getUser('target');
-        if (!target) {
-            target = interaction.member
-        }
-        const randomColor = Math.floor(Math.random()*16777215).toString(16);
+    data: new SlashCommandBuilder()
+    .setName('user')
+    .setDescription('Receive information regarding a user in the server.')
+    .addUserOption(option => option.setName('user').setDescription('The user to get info on').setRequired(false)),
+    async execute(interaction) {
         
-        const userEmbed = new EmbedBuilder().setColor(randomColor)
-                                            .setAuthor(`${interaction.member.username} aka ${interaction.member.nickname ? `alias ${interaction.member.nickname} ` : ""}`)
-                                            .setThumbnail(target.avatar)
-                                            .addFields(
-                                                { name: "name:", value: target.username, inline: true },
-                                                { name: "nickname:", value: target.nickname, inline: true },
-                                                { name: "Beigetretten am:", value: target.joinedTimestamp, inline: true },
-                                                { name: "Account Hergestellt am: ", value: target.user.createdTimestamp, inline: true },
-                                                { name: "default Avatar", value: target.user.defaultAvatarUrl, inline: true },
-                                                { name: "display Name", value: target.user.displayName, inline: true },
-                                                { name: "Premium", value: target.premiumSinceTimestamp, inline: true },
-                                                { name: "Rollen", value: target.roles, inline: true }
-                                            )
-
-		// interaction.user is the object representing the User who ran the command
-		// interaction.member is the GuildMember object, which represents the user in the specific guild
-		await interaction.reply(`This command was run by ${interaction.user.username}, who joined on ${interaction.member.joinedAt}.`);
-	},
-};
+        const randomColor = Math.floor(Math.random()*16777215).toString(16);
+        const user = interaction.options.getUser('user') || interaction.user;
+        const member = await interaction.guild.members.fetch(user.id);
+        const icon = user.displayAvatarURL();
+        const tag = user.tag;
+ 
+        const embed = new EmbedBuilder()
+        .setColor(randomColor)
+        .setAuthor({ name: tag, iconURL: icon})
+        .setThumbnail(icon)
+        .addFields({ name: "nickname", value: `${user.nickname}`, inline: true})
+        .addFields({ name: "username", value: `${user.username}`, inline: true})
+        .addFields({ name: "premium", value: `${user.premiumSinceTimestamp || "none"}`, inline: true})
+        .addFields({ name: "Roles", value: `${member.roles.cache.map(r => r).join(' ')}`, inline: false})
+        .addFields({ name: "Member", value: `${user}`, inline: false})
+        .addFields({ name: "beigetretten in diese Server", value: `<t:${parseInt(member.joinedAt / 1000)}:R>`, inline: true})
+        .addFields({ name: "beigetretten im Discord", value: `<t:${parseInt(user.createdAt / 1000)}:R>`, inline: true})
+        .setFooter({ text: `User-Name: ${user.username}`})
+        .setTimestamp()
+ 
+        await interaction.reply({ embeds: [embed] });
+    }
+}
