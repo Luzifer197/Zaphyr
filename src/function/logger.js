@@ -1,50 +1,43 @@
 const winston = require("winston");
 const colors = require("colors");
+const fs = require("fs");
 
 class Logger {
 	constructor(file) {
+		// Löschen Sie das vorhandene Logfile, falls es existiert
+		if (fs.existsSync(file)) {
+			fs.unlinkSync(file);
+		}
+
 		this.logger = winston.createLogger({
-			transports: [new winston.transports.File({ filename: file })],
+			transports: [
+				new winston.transports.File({ 
+					filename: file,
+					maxFiles: 0 // Überschreibt das Logfile bei jedem Neustart des Programms
+				})
+			],
+			format: winston.format.combine(
+				winston.format.timestamp(),
+				winston.format.printf(({ level, message, timestamp }) => {
+					return `[${timestamp}] ${level}: ${message}`;
+				})
+			)
 		});
 	}
 	
-	log(Text) {
-		let d = new Date();
-		this.logger.log({
-			level: "info",
-			message: "info: " + Text,
-		});
-		console.log(
-			colors.gray(
-				`[${ d.getDate() }:${ d.getMonth() }:${ d.getFullYear() } - ${ d.getHours() }:${ d.getMinutes() }]`,
-			) + colors.green(" | " + Text),
-		);
+	log(text) {
+		this.logger.info(text);
+		console.log(colors.grey(`[${new Date().toLocaleString()}]`) + colors.green(`| ${text}`));
 	}
 	
-	warn(Text) {
-		let d = new Date();
-		this.logger.log({
-			level: "warn",
-			message: "warn: " + Text,
-		});
-		console.log(
-			colors.gray(
-				`[${ d.getDate() }:${ d.getMonth() }:${ d.getFullYear() } - ${ d.getHours() }:${ d.getMinutes() }]`,
-			) + colors.yellow(" | " + Text),
-		);
+	warn(text) {
+		this.logger.warn(text);
+		console.log(colors.grey(`[${new Date().toLocaleString()}]`) + colors.green(`| ${text}`));
 	}
 	
-	error(Text) {
-		let d = new Date();
-		this.logger.log({
-			level: "error",
-			message: "error: " + Text,
-		});
-		console.log(
-			colors.gray(
-				`[${ d.getDate() }:${ d.getMonth() }:${ d.getFullYear() } - ${ d.getHours() }:${ d.getMinutes() }]`,
-			) + colors.red(" | " + Text),
-		);
+	error(text) {
+		this.logger.error(text);
+		console.log(colors.grey(`[${new Date().toLocaleString()}]`) + colors.green(`| ${text}`));
 	}
 }
 
