@@ -2,7 +2,7 @@ const { EmbedBuilder, SlashCommandBuilder } = require('discord.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName('Guild')
+    .setName('guild')
     .setDescription('Receive server information .'),
     async execute(interaction) {
         
